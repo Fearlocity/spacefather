@@ -6,23 +6,30 @@ const path = require('path');
 const hostname = '127.0.0.1';
 const port = 3000;
 
-// Path to HTML file 
-const htmlFilePath = path.join(__dirname, '/html/index.html');
+// Remove all references to index.html and always use Next.js for all routes
+const next = require('next');
+const dev = process.env.NODE_ENV !== 'production';
+const app = next({ dev, dir: __dirname });
+const handle = app.getRequestHandler();
 
-const server = http.createServer((req, res) => {
-  fs.readFile(htmlFilePath, (err, data) => {
-    if (err) {
-      res.statusCode = 500;
-      res.setHeader('Content-Type', 'text/plain');
-      res.end('Error loading HTML file.');
-    } else {
-      res.statusCode = 200;
-      res.setHeader('Content-Type', 'text/html');
-      res.end(data);
-    }
+app.prepare().then(() => {
+  const server = http.createServer((req, res) => {
+    // Always let Next.js handle all requests
+    handle(req, res);
   });
-});
 
-server.listen(port, hostname, () => {
-  console.log(`Server running at http://${hostname}:${port}/`);
+  server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(`Port ${port} is already in use. Please stop the other process or use a different port.`);
+    } else if (err.code === 'EPERM') {
+      console.error(`Permission error: ${err.message}\nTry running as administrator or check file/folder permissions.`);
+    } else {
+      console.error('Server error:', err);
+    }
+    process.exit(1);
+  });
+
+  server.listen(port, hostname, () => {
+    console.log(`Server running at http://${hostname}:${port}/`);
+  });
 });
