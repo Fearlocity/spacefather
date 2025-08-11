@@ -37,10 +37,6 @@ react-player, framer-motion, next-seo
 2. Who Are We Page
 Brand story and membership benefits
 
-Map of musicians benefitting from Spacefather
-
-CTA to Data & Marketing page
-
 Libraries/APIs:
 
 react-simple-maps, react-markdown, next-seo
